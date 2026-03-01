@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件下载中心</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #32a852;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2.5rem 0;
+            border-radius: 0 0 12px 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2.5rem;
+        }
+        
+        .header-content {
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 2.8rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* 搜索和筛选区域 */
+        .control-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 1.8rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        
+        .filter-btn {
+            padding: 10px 18px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        /* 文件列表 */
+        .files-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .file-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .file-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .file-header {
+            padding: 1.5rem 1.5rem 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .file-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .file-icon.pdf { background-color: #e74c3c; }
+        .file-icon.word { background-color: #2b579a; }
+        .file-icon.excel { background-color: #217346; }
+        .file-icon.image { background-color: #9b59b6; }
+        .file-icon.zip { background-color: #f39c12; }
+        .file-icon.video { background-color: #3498db; }
+        .file-icon.code { background-color: #e74c3c; }
+        .file-icon.audio { background-color: #1abc9c; }
+        
+        .file-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .file-meta {
+            font-size: 0.85rem;
+            color: #777;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .file-description {
+            padding: 0 1.5rem 1.2rem;
+            color: #555;
+            font-size: 0.95rem;
+            flex-grow: 1;
+        }
+        
+        .file-footer {
+            padding: 1.2rem 1.5rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .download-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        
+        .download-btn:hover {
+            background-color: #2a9847;
+        }
+        
+        .file-size {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        /* 统计信息 */
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .stat-icon.files { background-color: var(--primary-color); }
+        .stat-icon.size { background-color: #9b59b6; }
+        .stat-icon.types { background-color: #e74c3c; }
+        .stat-icon.updated { background-color: #1abc9c; }
+        
+        .stat-info h3 {
+            font-size: 2rem;
+            margin-bottom: 0.2rem;
+        }
+        
+        .stat-info p {
+            color: #777;
+            font-size: 0.95rem;
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 1.8rem 0;
+            color: #777;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .files-container {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                min-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .files-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card {
+                min-width: 100%;
+            }
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            grid-column: 1 / -1;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.8rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-cloud-download-alt"></i>
+                </div>
+                <h1>文件下载中心</h1>
+                <p class="subtitle">在这里，您可以找到并下载所有需要的文件。我们提供了多种文件类型，包括文档、图片、视频和压缩包等。</p>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="搜索文件名、描述或类型...">
+            </div>
+            
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-layer-group"></i> 全部文件
+                </button>
+                <button class="filter-btn" data-filter="pdf">
+                    <i class="fas fa-file-pdf"></i> PDF文档
+                </button>
+                <button class="filter-btn" data-filter="image">
+                    <i class="fas fa-image"></i> 图片
+                </button>
+                <button class="filter-btn" data-filter="video">
+                    <i class="fas fa-video"></i> 视频
+                </button>
+                <button class="filter-btn" data-filter="zip">
+                    <i class="fas fa-file-archive"></i> 压缩包
+                </button>
+            </div>
+        </div>
+        
+        <!-- 统计信息 -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon files">
+                    <i class="fas fa-file"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalFiles">12</h3>
+                    <p>文件总数</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon size">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>245 MB</h3>
+                    <p>总文件大小</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon types">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>7</h3>
+                    <p>文件类型</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon updated">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>2026-03-01</h3>
+                    <p>最后更新</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 文件列表 -->
+        <div class="files-container" id="filesContainer">
+            <!-- 文件卡片将通过JavaScript动态生成 -->
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>© 2026 文件下载中心 | 基于GitHub Pages部署 | 最后更新: 2026年3月1日</p>
+        </div>
+    </footer>
+
+    <script>
+        // 文件数据
+        const filesData = [
+            {
+                id: 1,
+                name: "项目需求文档",
+                description: "详细描述了项目的功能需求和技术规格，包含所有必要的开发细节。",
+                type: "pdf",
+                size: "2.4 MB",
+                date: "2026-02-25",
+                downloadUrl: "#",
+                icon: "file-pdf"
+            },
+            {
+                id: 2,
+                name: "用户界面设计图",
+                description: "包含所有页面的UI设计稿，提供了完整的视觉设计和交互说明。",
+                type: "image",
+                size: "5.7 MB",
+                date: "2026-02-24",
+                downloadUrl: "#",
+                icon: "image"
+            },
+            {
+                id: 3,
+                name: "产品演示视频",
+                description: "展示了产品核心功能的完整演示视频，适合用于宣传和培训。",
+                type: "video",
+                size: "45.2 MB",
+                date: "2026-02-23",
+                downloadUrl: "#",
+                icon: "video"
+            },
+            {
+                id: 4,
+                name: "源代码压缩包",
+                description: "项目完整的源代码，包含所有依赖库和配置文件，开箱即用。",
+                type: "zip",
+                size: "18.6 MB",
+                date: "2026-02-22",
+                downloadUrl: "#",
+                icon: "file-archive"
+            },
+            {
+                id: 5,
+                name: "项目进度报告",
+                description: "包含项目当前进度、遇到的问题和下一步计划的详细报告。",
+                type: "word",
+                size: "1.8 MB",
+                date: "2026-02-21",
+                downloadUrl: "#",
+                icon: "file-word"
+            },
+            {
+                id: 6,
+                name: "数据分析表格",
+                description: "包含项目相关数据分析和统计结果的Excel表格。",
+                type: "excel",
+                size: "3.2 MB",
+                date: "2026-02-20",
+                downloadUrl: "#",
+                icon: "file-excel"
+            },
+            {
+                id: 7,
+                name: "系统架构图",
+                description: "展示了系统整体架构和技术栈的高清示意图。",
+                type: "image",
+                size: "4.1 MB",
+                date: "2026-02-19",
+                downloadUrl: "#",
+                icon: "image"
+            },
+            {
+                id: 8,
+                name: "API接口文档",
+                description: "详细列出了所有API接口的调用方式、参数和返回结果。",
+                type: "pdf",
+                size: "1.5 MB",
+                date: "2026-02-18",
+                downloadUrl: "#",
+                icon: "file-pdf"
+            },
+            {
+                id: 9,
+                name: "安装配置指南",
+                description: "包含软件安装、环境配置和部署步骤的详细指南。",
+                type: "word",
+                size: "2.9 MB",
+                date: "2026-02-17",
+                downloadUrl: "#",
+                icon: "file-word"
+            },
+            {
+                id: 10,
+                name: "音频说明文件",
+                description: "对项目关键功能的语音说明，适合快速了解项目概览。",
+                type: "audio",
+                size: "12.3 MB",
+                date: "2026-02-16",
+                downloadUrl: "#",
+                icon: "file-audio"
+            },
+            {
+                id: 11,
+                name: "代码示例包",
+                description: "包含各种常见功能的代码示例，适合学习和参考。",
+                type: "code",
+                size: "7.8 MB",
+                date: "2026-02-15",
+                downloadUrl: "#",
+                icon: "file-code"
+            },
+            {
+                id: 12,
+                name: "项目资源包",
+                description: "包含项目所需的所有图标、字体和样式资源文件。",
+                type: "zip",
+                size: "32.7 MB",
+                date: "2026-02-14",
+                downloadUrl: "#",
+                icon: "file-archive"
+            }
+        ];
+
+        // 文件类型映射
+        const fileTypeMap = {
+            'pdf': { name: 'PDF文档', icon: 'file-pdf', class: 'pdf' },
+            'word': { name: 'Word文档', icon: 'file-word', class: 'word' },
+            'excel': { name: 'Excel表格', icon: 'file-excel', class: 'excel' },
+            'image': { name: '图片文件', icon: 'image', class: 'image' },
+            'video': { name: '视频文件', icon: 'video', class: 'video' },
+            'zip': { name: '压缩文件', icon: 'file-archive', class: 'zip' },
+            'code': { name: '代码文件', icon: 'file-code', class: 'code' },
+            'audio': { name: '音频文件', icon: 'file-audio', class: 'audio' }
+        };
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            renderFiles(filesData);
+            setupEventListeners();
+        });
+
+        // 渲染文件卡片
+        function renderFiles(files) {
+            const container = document.getElementById('filesContainer');
+            
+            if (files.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-search"></i>
+                        <h3>没有找到匹配的文件</h3>
+                        <p>尝试使用不同的搜索词或筛选条件</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            files.forEach(file => {
+                const fileType = fileTypeMap[file.type];
+                const fileCard = document.createElement('div');
+                fileCard.className = 'file-card';
+                fileCard.dataset.type = file.type;
+                
+                fileCard.innerHTML = `
+                    <div class="file-header">
+                        <div class="file-icon ${fileType.class}">
+                            <i class="fas fa-${fileType.icon}"></i>
+                        </div>
+                        <div class="file-info">
+                            <h3>${file.name}</h3>
+                            <div class="file-meta">
+                                <span>${fileType.name}</span>
+                                <span>${file.date}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="file-description">
+                        ${file.description}
+                    </div>
+                    <div class="file-footer">
+                        <span class="file-size">${file.size}</span>
+                        <button class="download-btn" data-id="${file.id}">
+                            <i class="fas fa-download"></i> 下载
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(fileCard);
+            });
+            
+            // 更新文件总数
+            document.getElementById('totalFiles').textContent = files.length;
+        }
+
+        // 设置事件监听
+        function setupEventListeners() {
+            // 筛选按钮事件
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 更新活动按钮
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 应用筛选
+                    const filter = this.dataset.filter;
+                    applyFilter(filter);
+                });
+            });
+            
+            // 搜索框事件
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                applySearch(this.value);
+            });
+            
+            // 下载按钮事件
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.download-btn')) {
+                    const fileId = e.target.closest('.download-btn').dataset.id;
+                    downloadFile(fileId);
+                }
+            });
+        }
+
+        // 应用筛选
+        function applyFilter(filterType) {
+            let filteredFiles = filesData;
+            
+            if (filterType !== 'all') {
+                filteredFiles = filesData.filter(file => file.type === filterType);
+            }
+            
+            renderFiles(filteredFiles);
+        }
+
+        // 应用搜索
+        function applySearch(searchTerm) {
+            if (!searchTerm.trim()) {
+                // 如果没有搜索词，显示当前筛选状态的文件
+                const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+                applyFilter(activeFilter);
+                return;
+            }
+            
+            const term = searchTerm.toLowerCase();
+            const filteredFiles = filesData.filter(file => 
+                file.name.toLowerCase().includes(term) || 
+                file.description.toLowerCase().includes(term) ||
+                fileTypeMap[file.type].name.toLowerCase().includes(term)
+            );
+            
+            renderFiles(filteredFiles);
+        }
+
+        // 下载文件处理
+        function downloadFile(fileId) {
+            const file = filesData.find(f => f.id == fileId);
+            if (file) {
+                // 这里在实际应用中应该指向真实的文件URL
+                // 这里我们模拟下载，显示一个提示
+                alert(`开始下载: ${file.name}\n文件大小: ${file.size}\n文件类型: ${fileTypeMap[file.type].name}`);
+                
+                // 在实际应用中，你可以使用以下方式：
+                // window.location.href = file.downloadUrl;
+                // 或者创建一个临时的a标签
+                // const link = document.createElement('a');
+                // link.href = file.downloadUrl;
+                // link.download = file.name;
+                // document.body.appendChild(link);
+                // link.click();
+                // document.body.removeChild(link);
+            }
+        }
+
+        // 模拟文件点击下载（演示用）
+        function simulateDownload() {
+            alert("这是一个演示页面。在实际应用中，下载按钮会连接到真实的文件URL。\n\n要使用此页面，请将文件上传到GitHub仓库，并更新JavaScript中filesData数组的downloadUrl属性。");
+        }
+
+        // 初始页面加载时显示提示
+        setTimeout(simulateDownload, 1000);
+    </script>
+</body>
+</html>
